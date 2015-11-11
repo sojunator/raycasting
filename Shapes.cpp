@@ -1,6 +1,15 @@
 #include "Shapes.h"
 #include "Laboration.h"
 
+Vec cross(const Vec& v1, const Vec& v2)
+{
+	Vec returnValue;
+
+	returnValue = Vec(v1.y*v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+	return returnValue;
+
+}
+
 float angle(Vec& v1, Vec& v2)
 {
 	float returnValue = abs(acos(v1.Dot(v2) / (v1.Length() * v2.Length())));
@@ -88,8 +97,7 @@ void LSphere::test(Ray& ray, HitData& hit)
 LTriangle::LTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color)
 {
 	// A = p1, B = p2, C = p3
-	Vec plane;
-	plane.Cross(_p1 - _p2, _p3 - _p2);
+	plane= cross(_p1 - _p2, _p3 - _p2);
 
 	p1 = _p1;
 	p2 = _p2;
@@ -131,7 +139,9 @@ void LTriangle::test(Ray& ray, HitData& hit)
 		CX = X - p3;
 
 
-		if ((angle(AB, AX) < angle(AB, AC)) && (angle(BA, BX) < angle(BA, BC)) && (angle(CX, CA) < angle(CA, CB)))
+		if ((angle(AB, AX) < angle(AB, AC) && (angle(AC, AX) < angle(AB, AC)) 
+			&& ((angle(BA, BX) < angle(BA, BC) && (angle(BC, BX) < angle(BA, BC))))
+			&& ((angle(CX, CA) < angle(CA, CB) && (angle(CB, CX) < angle(CA, CB))))))
 		{
 
 			if (hit.t == -1 && t > 0)

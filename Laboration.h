@@ -39,5 +39,7 @@ public:
 };
 
 float angle(Vec& v1, Vec& v2);
+Vec cross(const Vec& v1, const Vec& v2);
+
 
 #endif
