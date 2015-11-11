@@ -1,5 +1,15 @@
 #include "Shapes.h"
 #include "Laboration.h"
+#define EPSILON 0.00000001
+
+Vec cross(const Vec& v1, const Vec& v2)
+{
+	Vec returnValue;
+
+	returnValue = Vec(v1.y*v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+	return returnValue;
+
+}
 
 float angle(Vec& v1, Vec& v2)
 {
@@ -89,7 +99,7 @@ LTriangle::LTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color)
 {
 	// A = p1, B = p2, C = p3
 	Vec plane;
-	plane.Cross(_p1 - _p2, _p3 - _p2);
+	plane = cross(_p1 - _p2, _p3 - _p2);
 
 	p1 = _p1;
 	p2 = _p2;
@@ -102,51 +112,45 @@ LTriangle::LTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color)
 
 void LTriangle::test(Ray& ray, HitData& hit)
 {
+	Vec e_1, e_2, q, s, r;
+	float a, f, u, v, t;
+
+	e_1 = p2 - p1;
+	e_2 = p3 - p1;
 
 
-	float t = 0;
-	float over = -d - (plane.Dot(ray.o));
-	float under = plane.Dot(ray.d);
+	q = cross(ray.d, e_2);
+	a = e_1.Dot(q);
 
-	if (under != 0)
+	if (a > -0.0001 && a < 0.0001)
+		return;
+
+	f = 1 / a;
+	s = ray.o - p1;
+	u = f * (s.Dot(q));
+
+	if (u < 0.0)
+		return;
+
+	r = cross(s, e_1);
+	v = f * (ray.d.Dot(r));
+	
+	if (v < 0.0 || (u + v) > 1.0)
+		return;
+
+	t = f * (e_2.Dot(r));
+
+	if (hit.t == -1 && t > 0)
 	{
-		t = over / under;
-		// A = p1, B = p2, C = p3 AA = v
-		Vec Bat, BA, BC, AX, AAT, AC, V, X, AB, CA, CB, CX, BX;
-
-		X = ray.d*t + ray.o;
-
-		AB = p2 - p1;
-		BA = p1 - p2;
-		BC = p3 - p2;
-		AC = p3 - p1;
-		CA = p1 - p3;
-		CB = p2 - p3;
-
-		Bat = BC * (BA.Dot(BC) / BC.Dot(BC));
-		V = BA - Bat;
-
-		AX = X - p1;
-		BX = X - p2;
-		CX = X - p3;
-
-
-		if ((angle(AB, AX) < angle(AB, AC)) && (angle(BA, BX) < angle(BA, BC)) && (angle(CX, CA) < angle(CA, CB)))
-		{
-
-			if (hit.t == -1 && t > 0)
-			{
-				hit.t = t;
-				hit.lastShape = this;
-			}
-			else if (t < hit.t && t > 0)
-			{
-				hit.t = t;
-				hit.lastShape = this;
-			}
-		}
-
-
+		hit.t = t;
+		hit.lastShape = this;
+		hit.color = c;
+	}
+	else if (t < hit.t && t > 0)
+	{
+		hit.t = t;
+		hit.lastShape = this;
+		hit.color = c;
 	}
 
 }
