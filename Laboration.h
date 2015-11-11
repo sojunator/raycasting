@@ -8,7 +8,7 @@ class LPlane: public Shape
 	float	d;
 public:
 	void test(Ray& ray, HitData& hit);
-	Vec normal(Vec &point);
+	Vec normal(Vec &point) { return n; }
 	LPlane(Vec normal, float _d, Color color);
 
 };
@@ -25,5 +25,19 @@ public:
 	LSphere(Vec _center, float _radius, Color _color);
 };
 
+
+class LTriangle : public Shape
+{
+	Vec p1, p2, p3, nor, plane;
+	Vec edge0, edge1;
+	float d;
+public:
+	void test(Ray& ray, HitData& hit);
+	Vec normal(Vec &point) { return nor; }
+	LTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color);
+
+};
+
+float angle(Vec& v1, Vec& v2);
 
 #endif

@@ -14,6 +14,16 @@ struct Vec
 	Vec(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {};
 	float Dot(const Vec& v2) { return (x * v2.x) + (y * v2.y) + (z * v2.z); }
 
+
+
+	Vec Cross(const Vec& v1, const Vec& v2)
+	{
+		Vec returnValue;
+
+		returnValue = Vec(v1.y*v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+		return returnValue;
+
+	}
 	Vec operator-(const Vec& v)
 	{
 		return Vec(this->x - v.x, this->y - v.y, this->z - v.z);
