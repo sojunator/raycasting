@@ -1,5 +1,6 @@
 #include "Shapes.h"
 #include "Laboration.h"
+#include <utility>
 #define EPSILON 0.00000001
 
 Vec cross(const Vec& v1, const Vec& v2)
@@ -153,4 +154,137 @@ void LTriangle::test(Ray& ray, HitData& hit)
 		hit.color = c;
 	}
 
+}
+
+// motherfucking oob
+
+LOBB::LOBB(Vec b, Vec b1, Vec b2, Vec b3, float Hu, float Hv, float Hw, Color _color)
+{
+	Bcenter = b;
+	Bu = b1;
+	Bv = b2;
+	Bw = b3;
+
+	halfBu = Hu;
+	halfBv = Hv;
+	halfBw = Hw;
+
+	Pu = Bu * halfBu;
+	Pv = Bv * halfBv;
+	Pw = Bw * halfBw;
+
+	Pvo = Bv * (-halfBv);
+	Puo = Bu * (-halfBu);
+	Pwo = Bw * (-halfBw);
+
+	c = _color;
+}
+
+LOBB::LOBB(Vec b, float Hu, float Hv, float Hw, Color _color)
+{
+	Bcenter = b;
+	Bu = Vec(1, 0, 0) * Hu;
+	Bv = Vec(0, 1, 0) * Hv;
+	Bw = Vec(0, 0, 1) * Hw;
+
+	halfBu = Hu;
+	halfBv = Hv;
+	halfBw = Hw;
+
+	Pu = Bu * halfBu;
+	Pv = Bv * halfBv;
+	Pw = Bw * halfBw;
+
+	Pvo = Bv * (-halfBv);
+	Puo = Bu * (-halfBu);
+	Pwo = Bw * (-halfBw);
+
+	c = _color;
+
+}
+
+void LOBB::test(Ray& ray, HitData& hit)
+{
+	float t_max = INFINITY;
+	float t_min = -INFINITY;
+
+	float e, f, t_1, t_2;
+
+	Vec bArr[3];
+	float lenghtArr[3];
+
+	bArr[0] = Bu;
+	lenghtArr[0] = halfBu;
+
+	bArr[1] = Bv;
+	lenghtArr[1] = halfBv;
+
+	bArr[2] = Bw;
+	lenghtArr[2] = halfBw;
+
+	Vec p = Bcenter - ray.o;
+	
+	for (int i = 0; i < 3; i++)
+	{
+		e = bArr[i].Dot(p);
+		f = bArr[i].Dot(ray.d);
+
+		if (abs(f) > 0.0001)
+		{
+			t_1 = (e + lenghtArr[i]) / f;
+			t_2 = (e - lenghtArr[i]) / f;
+
+			if (t_1 > t_2)
+				std::swap(t_1, t_2);
+
+			if (t_1 > t_min)
+				t_min = t_1;
+
+			if (t_2 < t_max)
+				t_max = t_2;
+
+			if (t_min > t_max || t_max < 0)
+				return;
+
+		}
+		else if (-e - lenghtArr[i] > 0 || -e + lenghtArr[i] < 0)
+			return;
+	}
+
+	if (t_min > 0)
+	{
+		if (hit.t == -1 && t_min > 0)
+		{
+			hit.t = t_min;
+			hit.lastShape = this;
+			hit.color = c;
+		}
+		else if (t_min < hit.t && t_min > 0)
+		{
+			hit.t = t_min;
+			hit.lastShape = this;
+			hit.color = c;
+		}
+	}
+	else
+	{
+		if (hit.t == -1 && t_max > 0)
+		{
+			hit.t = t_max;
+			hit.lastShape = this;
+			hit.color = c;
+		}
+		else if (t_max < hit.t && t_max > 0)
+		{
+			hit.t = t_max;
+			hit.lastShape = this;
+			hit.color = c;
+		}
+	}
+
+}
+
+Vec LOBB::normal(Vec& point)
+{
+	return Vec(0, 0, 0);
 }
