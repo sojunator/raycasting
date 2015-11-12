@@ -10,7 +10,7 @@ public:
 	void test(Ray& ray, HitData& hit);
 	Vec normal(Vec &point) { return n; }
 	LPlane(Vec normal, float _d, Color color);
-
+	Color shade(Vec& light, const Vec& cam, Ray& r, HitData& h);
 };
 
 
@@ -23,6 +23,7 @@ public:
 	void test(Ray& ray, HitData& hit);
 	Vec normal(Vec &point);
 	LSphere(Vec _center, float _radius, Color _color);
+	Color shade(Vec& light, const Vec& cam, Ray& r, HitData& h);
 };
 
 
@@ -33,8 +34,9 @@ class LTriangle : public Shape
 	float d;
 public:
 	void test(Ray& ray, HitData& hit);
-	Vec normal(Vec &point) { return nor; }
+	Vec normal(Vec &point) { return plane; }
 	LTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color);
+	Color shade(Vec& light, const Vec& cam, Ray& r, HitData& h);
 
 };
 
