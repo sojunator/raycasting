@@ -20,12 +20,37 @@ float angle(Vec& v1, Vec& v2)
 
 Color Shape::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
 {
-	return c;
+	Vec lightDirection;
+	float ln, colorArr[3];
+	Color diffuseLight, ambientLight, shadedColor;
+
+	diffuseLight = Color(1.0f, 1.0f, 1.0f);
+	ambientLight = Color(50.0f / 255.0f, 50 / 255.0f, 50 / 255.0f);
+
+	lightDirection = light - r.o + r.d*h.t;
+	lightDirection.Normalize();
+
+	ln = h.lastNormal.Dot(lightDirection);
+	 
+	colorArr[0] = ((h.color.r / 255.0f) * diffuseLight.r * ln + ambientLight.r * (h.color.r / 255.0f)) * 255;
+	colorArr[1] = ((h.color.g / 255.0f) * diffuseLight.g * ln + ambientLight.g * (h.color.g / 255.0f)) * 255;
+	colorArr[2] = ((h.color.b / 255.0f) * diffuseLight.b * ln + ambientLight.r * (h.color.b / 255.0f)) * 255;
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (colorArr[i] > 255.0f)
+			colorArr[i] = 255.0f;
+	}
+
+	shadedColor = Color(colorArr[0], colorArr[1], colorArr[2]);
+
+	return shadedColor;
 }
 
 
 LPlane::LPlane(Vec normal, float _d, Color color)
 {
+	normal.Normalize();
 	n = normal;
 	d = _d;
 	c = color;
@@ -45,28 +70,18 @@ void LPlane::test(Ray& ray, HitData& hit)
 	{
 		hit.t = t;
 		hit.lastShape = this;
+		hit.lastNormal = this->n;
+		hit.color = this->c;
 	}
 	else if (t < hit.t && t > 0)
 	{
 		hit.t = t;
 		hit.lastShape = this;
+		hit.lastNormal = this->n;
+		hit.color = this->c;
 	}
 }
 
-Color LPlane::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
-{
-	float red, green, blue;
-	float nl = n.Dot(r.d);
-	if (!nl)
-		return Color(0,0,0);
-
-	red = 200 * 1.0 * nl + 200 * 0.19;
-	green = 100 * 1.0 * nl + 100 * 0.19;
-	blue = 50 * 1.0 * nl + 50 * 0.19;
-
-	return Color(red, green, blue);
-
-}
 
 // Sphere
 
@@ -100,30 +115,16 @@ void LSphere::test(Ray& ray, HitData& hit)
 	{
 		hit.t = t;
 		hit.lastShape = this;
-		hit.lastNormal = this->normal(ray.d*t + ray.o);
+		hit.lastNormal = this->normal(ray.o);
+		hit.color = this->c;
 	}
 	else if (t < hit.t && t > 0)
 	{
 		hit.t = t;
 		hit.lastShape = this;
-		hit.lastNormal = this->normal(ray.d*t + ray.o);
+		hit.lastNormal = this->normal(ray.o);
+		hit.color = this->c;
 	}
-
-}
-
-Color LSphere::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
-{
-	float red, green, blue;
-	float nl = h.lastNormal.Dot(r.d);
-
-	if (!nl)
-		return Color(0, 0, 0);
-
-	red = 200 * 1.0 * nl + 200 * 0.19;
-	green = 100 * 1.0 * nl + 100 * 0.19;
-	blue = 50 * 1.0 * nl + 50 * 0.19;
-
-	return Color(red, green, blue);
 
 }
 
@@ -131,18 +132,23 @@ Color LSphere::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
 
 LTriangle::LTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color)
 {
-	// A = p1, B = p2, C = p3
-	plane = cross(_p1 - _p2, _p3 - _p2);
-	plane.Normalize();
-
 	p1 = _p1;
 	p2 = _p2;
 	p3 = _p3;
-	c = _color;
 
-	d = 0 - (plane.x * p1.x + plane.y * p1.y + plane.z * p1.z);
+	edge0 = p2 - p1;
+	edge1 = p3 - p1;
+
+	c = _color;
 }
 
+Vec LTriangle::normal(Vec &point)
+{
+	Vec plane = cross(edge0, edge1);
+	plane.Normalize();
+
+	return plane;
+}
 
 void LTriangle::test(Ray& ray, HitData& hit)
 {
@@ -179,38 +185,18 @@ void LTriangle::test(Ray& ray, HitData& hit)
 		hit.t = t;
 		hit.lastShape = this;
 		hit.color = c;
-		hit.lastNormal = plane;
+		hit.lastNormal = this->normal(Vec(0, 0, 0));
 	}
 	else if (t < hit.t && t > 0)
 	{
 		hit.t = t;
 		hit.lastShape = this;
 		hit.color = c;
-		hit.lastNormal = plane;
+		hit.lastNormal = this->normal(Vec(0,0,0));
 	}
 
 }
 
-Color LTriangle::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
-{
-
-	float red, green, blue;
-
-	
-	Vec p = r.d*h.t + r.o - light;
-	p.Normalize();
-
-	float np = h.lastNormal.Dot(p);
-
-	if (!np)
-		return Color(0, 0, 0);
-
-	red = c.r * 1.0 * np + 200 * 0.19;
-	green = c.g * 1.0 * np + 100 * 0.19;
-	blue = c.b * 1.0 * np + 50 * 0.19;
-
-	return Color(red, green, blue);
-}
 
 // motherfucking oob
 
