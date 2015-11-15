@@ -24,17 +24,17 @@ Color Shape::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
 	float ln, colorArr[3];
 	Color diffuseLight, ambientLight, shadedColor;
 
-	diffuseLight = Color(1.0f, 1.0f, 1.0f);
-	ambientLight = Color(50.0f / 255.0f, 50 / 255.0f, 50 / 255.0f);
+	diffuseLight = { 255, 255, 255 };
+	ambientLight = { 50, 50, 50 };
 
-	lightDirection = light - r.o + r.d*h.t;
+	lightDirection = light - (r.o + r.d*h.t);
 	lightDirection.Normalize();
 
 	ln = h.lastNormal.Dot(lightDirection);
 	 
-	colorArr[0] = ((h.color.r / 255.0f) * diffuseLight.r * ln + ambientLight.r * (h.color.r / 255.0f)) * 255;
-	colorArr[1] = ((h.color.g / 255.0f) * diffuseLight.g * ln + ambientLight.g * (h.color.g / 255.0f)) * 255;
-	colorArr[2] = ((h.color.b / 255.0f) * diffuseLight.b * ln + ambientLight.r * (h.color.b / 255.0f)) * 255;
+	colorArr[0] = ((h.color.r / 255.0f) * (diffuseLight.r / 255.0f) * ln + (ambientLight.r / 255.0f) * (h.color.r / 255.0f)) * 255.0f;
+	colorArr[1] = ((h.color.g / 255.0f) * (diffuseLight.g / 255.0f) * ln + (ambientLight.g / 255.0f) * (h.color.g / 255.0f)) * 255.0f;
+	colorArr[2] = ((h.color.b / 255.0f) * (diffuseLight.b / 255.0f) * ln + (ambientLight.r / 255.0f) * (h.color.b / 255.0f)) * 255.0f;
 
 	for (int i = 0; i < 3; i++)
 	{
@@ -115,14 +115,14 @@ void LSphere::test(Ray& ray, HitData& hit)
 	{
 		hit.t = t;
 		hit.lastShape = this;
-		hit.lastNormal = this->normal(ray.o);
+		hit.lastNormal = this->normal(ray.o + ray.d*hit.t);
 		hit.color = this->c;
 	}
 	else if (t < hit.t && t > 0)
 	{
 		hit.t = t;
 		hit.lastShape = this;
-		hit.lastNormal = this->normal(ray.o);
+		hit.lastNormal = this->normal(ray.o + ray.d*hit.t);
 		hit.color = this->c;
 	}
 
