@@ -207,17 +207,23 @@ LOBB::LOBB(Vec b, Vec b1, Vec b2, Vec b3, float Hu, float Hv, float Hw, Color _c
 	Bv = b2;
 	Bw = b3;
 
+	Buo = Vec(0, 0, 0) - b1;
+	Bvo = Vec(0, 0, 0) - b2;
+	Bwo = Vec(0, 0, 0) - b3;
+
 	halfBu = Hu;
 	halfBv = Hv;
 	halfBw = Hw;
 
-	Pu = Bu * halfBu;
-	Pv = Bv * halfBv;
-	Pw = Bw * halfBw;
 
-	Pvo = Bv * (-halfBv);
-	Puo = Bu * (-halfBu);
-	Pwo = Bw * (-halfBw);
+	Pu = Bcenter + (Bu * halfBu);
+	Pv = Bcenter + (Bv * halfBv);
+	Pw = Bcenter + (Bw * halfBw);
+
+
+	Pvo = Bcenter - (Bu * halfBu);
+	Puo = Bcenter - (Bv * halfBv);
+	Pwo = Bcenter - (Bw * halfBw);
 
 	c = _color;
 }
@@ -233,13 +239,13 @@ LOBB::LOBB(Vec b, float Hu, float Hv, float Hw, Color _color)
 	halfBv = Hv;
 	halfBw = Hw;
 
-	Pu = Bu * halfBu;
-	Pv = Bv * halfBv;
-	Pw = Bw * halfBw;
+	Pu = Bcenter + (Bu * halfBu);
+	Pv = Bcenter + (Bv * halfBv);
+	Pw = Bcenter + (Bw * halfBw);
 
-	Pvo = Bv * (-halfBv);
-	Puo = Bu * (-halfBu);
-	Pwo = Bw * (-halfBw);
+	Pvo = Bcenter - (Bu * halfBu);
+	Puo = Bcenter - (Bv * halfBv);
+	Pwo = Bcenter - (Bw * halfBw);
 
 	c = _color;
 
@@ -300,12 +306,14 @@ void LOBB::test(Ray& ray, HitData& hit)
 			hit.t = t_min;
 			hit.lastShape = this;
 			hit.color = c;
+			hit.lastNormal = this->normal(ray.o + ray.d*t_min);
 		}
 		else if (t_min < hit.t && t_min > 0)
 		{
 			hit.t = t_min;
 			hit.lastShape = this;
 			hit.color = c;
+			hit.lastNormal = this->normal(ray.o + ray.d*t_min);
 		}
 	}
 	else
@@ -315,12 +323,14 @@ void LOBB::test(Ray& ray, HitData& hit)
 			hit.t = t_max;
 			hit.lastShape = this;
 			hit.color = c;
+			hit.lastNormal = this->normal(ray.o + ray.d*t_max);
 		}
 		else if (t_max < hit.t && t_max > 0)
 		{
 			hit.t = t_max;
 			hit.lastShape = this;
 			hit.color = c;
+			hit.lastNormal = this->normal(ray.o + ray.d*t_max);
 		}
 	}
 
@@ -328,5 +338,22 @@ void LOBB::test(Ray& ray, HitData& hit)
 
 Vec LOBB::normal(Vec& point)
 {
-	return Vec(0, 0, 0);
+	Vec planePoints[6] = { Pu, Pv, Pw, Puo, Pvo, Pwo };
+	Vec normalVectors[6] = { Bu, Bv, Bw, Buo, Bvo, Bwo};
+
+
+	for (int i = 0; i < 6; i++)
+	{
+		Vec temp = point - planePoints[i];
+		temp.Normalize();
+		for (int j = 0; j < 6; j++)
+		{
+			if (temp.Dot(normalVectors[j]) == 0)
+			{
+				return normalVectors[i];
+			}
+		}
+	}
+
+	return Bw;
 }

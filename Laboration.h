@@ -43,9 +43,9 @@ class LOBB : public Shape
 {
 public:
 	Vec Bcenter;
-	Vec Bu;
-	Vec Bv;
-	Vec Bw;
+	Vec Bu, Buo;
+	Vec Bv, Bvo;
+	Vec Bw, Bwo;
 
 	Vec Pu, Puo;
 	Vec Pv, Pvo;

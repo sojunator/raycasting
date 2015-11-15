@@ -53,7 +53,7 @@ void buildScene()
 			shapes.push_back(dynamic_cast<Shape*>(new LTriangle(p0 + off, p1 + off, p2 + off, { 255,255,0 })));
 		}
 
-		/*
+
 		// one OBB touching the sphere on the side
 		// base
 		Vec b1{ 1, 0, 0 };
@@ -72,7 +72,7 @@ void buildScene()
 		b2.z = b2.y * -sinf(angle) + b2.z * cosf(angle);
 		b2.y = tempY;
 		shapes.push_back(dynamic_cast<Shape*>(new LOBB(Vec(200,600,400), b1,b2,b3, 100, 100, 100, {255,0,0})));
-		*/
+	
 		
 	}
 }
