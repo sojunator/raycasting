@@ -31,6 +31,8 @@ Color Shape::shade(Vec& light, const Vec& cam, Ray& r, HitData& h)
 	lightDirection.Normalize();
 
 	ln = h.lastNormal.Dot(lightDirection);
+	if (ln < 0.f)
+		ln = 0.0f;
 	 
 	colorArr[0] = ((h.color.r / 255.0f) * (diffuseLight.r / 255.0f) * ln + (ambientLight.r / 255.0f) * (h.color.r / 255.0f)) * 255.0f;
 	colorArr[1] = ((h.color.g / 255.0f) * (diffuseLight.g / 255.0f) * ln + (ambientLight.g / 255.0f) * (h.color.g / 255.0f)) * 255.0f;
@@ -221,8 +223,8 @@ LOBB::LOBB(Vec b, Vec b1, Vec b2, Vec b3, float Hu, float Hv, float Hw, Color _c
 	Pw = Bcenter + (Bw * halfBw);
 
 
-	Pvo = Bcenter - (Bu * halfBu);
-	Puo = Bcenter - (Bv * halfBv);
+	Puo = Bcenter - (Bu * halfBu);
+	Pvo = Bcenter - (Bv * halfBv);
 	Pwo = Bcenter - (Bw * halfBw);
 
 	c = _color;
@@ -345,15 +347,11 @@ Vec LOBB::normal(Vec& point)
 	for (int i = 0; i < 6; i++)
 	{
 		Vec temp = point - planePoints[i];
-		temp.Normalize();
-		for (int j = 0; j < 6; j++)
+
+		if (abs(temp.Dot(normalVectors[i])) < 0.0001f)
 		{
-			if (temp.Dot(normalVectors[j]) == 0)
-			{
-				return normalVectors[i];
-			}
+			return normalVectors[i];
 		}
 	}
 
-	return Bw;
 }
