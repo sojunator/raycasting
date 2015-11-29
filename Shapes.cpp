@@ -1,7 +1,7 @@
 #include "Shapes.h"
 #include "Laboration.h"
 #include <utility>
-#define EPSILON 0.00000001
+#define EPSILON 0.001
 
 Vec cross(const Vec& v1, const Vec& v2)
 {
@@ -64,8 +64,11 @@ void LPlane::test(Ray& ray, HitData& hit)
 	float over = -d - (n.Dot(ray.o));
 	float under = n.Dot(ray.d);
 
-	if (under != 0)
-		t = over / under;
+	if (abs(under) < EPSILON)
+		return;
+
+	t = over / under;
+	
 
 
 	if (hit.t == -1 && t > 0)
@@ -106,8 +109,13 @@ void LSphere::test(Ray& ray, HitData& hit)
 {
 	float b = ray.d.Dot(ray.o - center);
 	float c = (ray.o - center).Dot(ray.o - center) - (radius*radius);
-	float t_1 = -b + sqrt((b*b - c));
-	float t_2 = -b - sqrt((b*b - c));
+
+    if (c > b*b) // skip imaginary roots
+		return;
+
+	float root = sqrt((b*b - c));
+	float t_1 = -b + root;
+	float t_2 = -b - root;
 
 	float t = t_2;
 	if (t_1 < t_2)
